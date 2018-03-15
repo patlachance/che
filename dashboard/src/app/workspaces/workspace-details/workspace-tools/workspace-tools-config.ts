@@ -13,7 +13,6 @@ import {WorkspaceDetailsToolsController} from './workspace-details-tools.control
 import {WorkspaceDetailsTools} from './workspace-details-tools.directive';
 import {WorkspaceToolsIdeController} from './workspace-tools-ide/workspace-tools-ide.controller';
 import {WorkspaceToolsIde} from './workspace-tools-ide/workspace-tools-ide.directive';
-import {WorkspaceDetailsToolsService} from './workspace-details-tools.service';
 
 
 /**
@@ -26,6 +25,5 @@ export class WorkspaceToolsConfig {
     register.directive('workspaceDetailsTools', WorkspaceDetailsTools);
     register.controller('WorkspaceToolsIdeController', WorkspaceToolsIdeController);
     register.directive('workspaceToolsIde', WorkspaceToolsIde);
-    register.service('workspaceDetailsToolsService', WorkspaceDetailsToolsService);
   }
 }

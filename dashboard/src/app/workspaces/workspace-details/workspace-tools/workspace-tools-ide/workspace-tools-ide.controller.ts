@@ -10,7 +10,8 @@
  */
 'use strict';
 import {IPackage, ISearchResults, NpmRegistry} from '../../../../../components/api/npm-registry.factory';
-import {WorkspaceDetailsToolsService} from '../workspace-details-tools.service';
+import {IEnvironmentManagerMachine} from '../../../../../components/api/environment/environment-manager-machine';
+import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
 
 const THEIA_PLUGINS = 'THEIA_PLUGINS';
 
@@ -21,15 +22,19 @@ const THEIA_PLUGINS = 'THEIA_PLUGINS';
  * @author Ann Shumilova
  */
 export class WorkspaceToolsIdeController {
-  static $inject = ['npmRegistry', 'lodash', 'cheListHelperFactory', '$scope', 'workspaceDetailsToolsService'];
+  static $inject = ['npmRegistry', 'lodash', 'cheListHelperFactory', '$scope'];
+  npmRegistry: NpmRegistry;
+  lodash: any;
+
   packageOrderBy = 'name';
   packages: Array<IPackage>;
   packagesSummary: ISearchResults;
   packagesFilter: any;
-  workspaceDetailsToolsService: WorkspaceDetailsToolsService;
   environmentVariables: { [envVarName: string]: string } = {};
   plugins: Array<string>;
-
+  machine: IEnvironmentManagerMachine;
+  environmentManager: EnvironmentManager;
+  onChange: Function;
 
   private cheListHelper: che.widget.ICheListHelper;
 
@@ -38,30 +43,45 @@ export class WorkspaceToolsIdeController {
    * Default constructor that is using resource
    */
   constructor(npmRegistry: NpmRegistry, lodash: any, cheListHelperFactory: che.widget.ICheListHelperFactory,
-              $scope: ng.IScope, workspaceDetailsToolsService: WorkspaceDetailsToolsService) {
-    const helperId = 'workspace-tools-ide';
-    this.workspaceDetailsToolsService = workspaceDetailsToolsService;
+              $scope: ng.IScope) {
+    this.npmRegistry = npmRegistry;
+    this.lodash = lodash;
 
+    const helperId = 'workspace-tools-ide';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+
     this.packagesFilter = {name: ''};
 
-    npmRegistry.search('keywords:theia-extension').then((data: ISearchResults) => {
-      this.packagesSummary = data;
-      this.packages = lodash.pluck(this.packagesSummary.results, 'package');
-      this.packages.forEach((_package: IPackage) => {
-        _package.isEnabled = this.isPackageEnabled(_package.name);
-      });
-      this.cheListHelper.setList(this.packages, 'name');
-    });
+    this.fetchNPMPackages();
 
-    let machine = this.workspaceDetailsToolsService.getCurrentMachine();
-    this.environmentVariables = this.workspaceDetailsToolsService.getEnvironmentManager().getEnvVariables(machine);
-    this.plugins = machine && this.environmentVariables[THEIA_PLUGINS] ? this.environmentVariables[THEIA_PLUGINS].split(',') : [];
+    const deRegistrationFn = $scope.$watch(() => {
+      return this.machine;
+    }, (machine: IEnvironmentManagerMachine) => {
+      if (!this.packages) {
+        return;
+      }
+      this.updatePackages();
+    }, true);
+
+    $scope.$on('$destroy', () => {
+      deRegistrationFn();
+    });
   }
 
+  /**
+   * Fetches the list of NPM packages.
+   */
+  fetchNPMPackages(): void {
+    this.npmRegistry.search('keywords:theia-extension').then((data: ISearchResults) => {
+      this.packagesSummary = data;
+      this.packages = this.lodash.pluck(this.packagesSummary.results, 'package');
+      this.updatePackages();
+    });
+  }
 
   /**
    * Callback when name is changed.
@@ -73,6 +93,11 @@ export class WorkspaceToolsIdeController {
     this.cheListHelper.applyFilter('name', this.packagesFilter);
   }
 
+  /**
+   * Update package information based on UI changes.
+   *
+   * @param {IPackage} _package
+   */
   updatePackage(_package: IPackage): void {
     if (_package.isEnabled) {
       this.plugins.push(_package.name);
@@ -80,12 +105,30 @@ export class WorkspaceToolsIdeController {
       this.plugins.splice(this.plugins.indexOf(_package.name), 1);
     }
 
-    let machine = this.workspaceDetailsToolsService.getCurrentMachine();
     this.environmentVariables[THEIA_PLUGINS] = this.plugins.join(',');
-    this.workspaceDetailsToolsService.getEnvironmentManager().setEnvVariables(machine, this.environmentVariables);
-    this.workspaceDetailsToolsService.getChangeCallback()();
+    this.environmentManager.setEnvVariables(this.machine, this.environmentVariables);
+    this.onChange();
   }
 
+  /**
+   * Update the state of packages.
+   */
+  private updatePackages(): void {
+    this.environmentVariables = this.environmentManager.getEnvVariables(this.machine);
+    this.plugins = this.machine && this.environmentVariables[THEIA_PLUGINS] ? this.environmentVariables[THEIA_PLUGINS].split(',') : [];
+
+    this.packages.forEach((_package: IPackage) => {
+      _package.isEnabled = this.isPackageEnabled(_package.name);
+    });
+    this.cheListHelper.setList(this.packages, 'name');
+  }
+
+  /**
+   * Checks whether package is enabled.
+   *
+   * @param {string} name package's name
+   * @returns {boolean} <code>true</code> true if enabled
+   */
   private isPackageEnabled(name: string): boolean {
     return this.plugins.indexOf(name) >= 0;
   }

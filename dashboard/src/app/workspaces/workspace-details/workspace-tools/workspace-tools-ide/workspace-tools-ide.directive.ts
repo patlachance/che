@@ -45,5 +45,10 @@ export class WorkspaceToolsIde implements ng.IDirective {
    * Default constructor that is using resource
    */
   constructor() {
+    this.scope = {
+      onChange: '&',
+      machine: '=',
+      environmentManager: '='
+    };
   }
 }

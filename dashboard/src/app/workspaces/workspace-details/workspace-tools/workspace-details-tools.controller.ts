@@ -9,9 +9,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {WorkspaceDetailsToolsService} from './workspace-details-tools.service';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
+
+const IDE_TOOL_TYPE: string = 'ide';
 
 /**
  * @ngdoc controller
@@ -20,43 +21,32 @@ import {EnvironmentManager} from '../../../../components/api/environment/environ
  * @author Ann Shumilova
  */
 export class WorkspaceDetailsToolsController {
-  static $inject = ['workspaceDetailsToolsService', '$scope'];
-  private selectedMachine: IEnvironmentManagerMachine;
-  private environmentManager: EnvironmentManager;
-  private onChange: Function;
-  private workspaceDetailsToolsService: WorkspaceDetailsToolsService;
-  private toolType: string;
-  private page: string;
+  static $inject = ['lodash'];
+
+  lodash: any;
+  selectedMachine: IEnvironmentManagerMachine;
+  environmentManager: EnvironmentManager;
+  onChange: Function;
 
   /**
    * Default constructor that is using resource
    */
-  constructor(workspaceDetailsToolsService: WorkspaceDetailsToolsService, $scope: ng.IScope) {
-    this.workspaceDetailsToolsService = workspaceDetailsToolsService;
-
-    this.init(this.selectedMachine);
-
-    const deRegistrationFn = $scope.$watch(() => {
-      return this.selectedMachine;
-    }, (selectedMachine: IEnvironmentManagerMachine) => {
-      this.init(selectedMachine);
-    }, true);
-
-    $scope.$on('$destroy', () => {
-      deRegistrationFn();
-    });
+  constructor(lodash: any) {
+    this.lodash = lodash;
   }
 
-  init(selectedMachine: IEnvironmentManagerMachine): void {
-    if (!selectedMachine) {
-      return;
+  isIDE(machine: IEnvironmentManagerMachine): boolean {
+    if (!machine) {
+      return false;
     }
-    this.workspaceDetailsToolsService.setEnvironmentManager(this.environmentManager);
-    this.workspaceDetailsToolsService.setCurrentMachine(selectedMachine);
-    this.workspaceDetailsToolsService.setChangeCallback(this.onChange);
-    this.toolType = this.workspaceDetailsToolsService.detectToolType(selectedMachine);
-    if (this.toolType) {
-      this.page = this.workspaceDetailsToolsService.getToolConfigPage(this.toolType);
+
+    let serverAttributes = this.lodash.pluck(machine.servers, 'attributes');
+    for (let i = 0; i < serverAttributes.length; i++) {
+      // todo needs refinements when the way of defining tools will be implemented
+      if (serverAttributes[i].type === IDE_TOOL_TYPE) {
+        return true;
+      }
     }
+    return false;
   }
 }
