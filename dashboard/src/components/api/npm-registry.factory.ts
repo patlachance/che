@@ -24,15 +24,15 @@ export interface ISearchResult {
 
 export interface IPackage {
   name: string;
-  scope: string;
-  version: string;
-  description: string;
-  keywords: Array<string>;
-  date: string;
-  links: Object;
-  author: Object;
-  publisher: Object;
-  maintainers: Array<Object>;
+  scope?: string;
+  version?: string;
+  description?: string;
+  keywords?: Array<string>;
+  date?: string;
+  links?: Object;
+  author?: Object;
+  publisher?: Object;
+  maintainers?: Array<Object>;
   isEnabled?: boolean;
 }
 

@@ -1,6 +1,10 @@
 <md-progress-linear ng-show="workspaceToolsIdeController.isLoading" md-mode="indeterminate"></md-progress-linear>
 <div flex layout="column" md-theme="maincontent-theme" class="packages-page">
   <che-list-header-additional-parts>
+    <div che-multi-transclude-part="che-list-add-button">
+      <add-package-popover
+        on-add-package="workspaceToolsIdeController.addPackage(name, location)"></add-package-popover>
+    </div>
     <div che-multi-transclude-part="che-list-search">
       <che-list-header-search placeholder="Search"
                               query="workspaceToolsIdeController.packagesFilter.name"
@@ -16,6 +20,8 @@
       <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
       <div flex layout="row" layout-align="start center" class="che-list-item-details">
         <che-list-header-column flex="10" layout="column" layout-align="center start"
+                                che-sort-value="workspaceToolsIdeController.packageOrderBy"
+                                che-sort-item="isEnabled"
                                 che-column-title="Use"></che-list-header-column>
         <che-list-header-column flex="25" layout="column" layout-align="center start"
                                 che-sort-value="workspaceToolsIdeController.packageOrderBy"

@@ -13,6 +13,8 @@ import {WorkspaceDetailsToolsController} from './workspace-details-tools.control
 import {WorkspaceDetailsTools} from './workspace-details-tools.directive';
 import {WorkspaceToolsIdeController} from './workspace-tools-ide/workspace-tools-ide.controller';
 import {WorkspaceToolsIde} from './workspace-tools-ide/workspace-tools-ide.directive';
+import {AddPackagePopoverController} from './workspace-tools-ide/add-package-popover.controller';
+import {AddPackagePopover} from './workspace-tools-ide/add-package-popover.directive';
 
 
 /**
@@ -25,5 +27,7 @@ export class WorkspaceToolsConfig {
     register.directive('workspaceDetailsTools', WorkspaceDetailsTools);
     register.controller('WorkspaceToolsIdeController', WorkspaceToolsIdeController);
     register.directive('workspaceToolsIde', WorkspaceToolsIde);
+    register.controller('AddPackagePopoverController', AddPackagePopoverController);
+    register.directive('addPackagePopover', AddPackagePopover);
   }
 }

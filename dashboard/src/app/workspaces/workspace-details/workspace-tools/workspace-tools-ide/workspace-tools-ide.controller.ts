@@ -26,7 +26,8 @@ export class WorkspaceToolsIdeController {
   npmRegistry: NpmRegistry;
   lodash: any;
 
-  packageOrderBy = 'name';
+  addPackage: Function;
+  packageOrderBy = '-isEnabled';
   packages: Array<IPackage>;
   packagesSummary: ISearchResults;
   packagesFilter: any;
@@ -70,6 +71,14 @@ export class WorkspaceToolsIdeController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+
+    this.addPackage = (name: string, location: string) => {
+      this.plugins.push(name + ':' + location);
+      this.environmentVariables[THEIA_PLUGINS] = this.plugins.join(',');
+      this.environmentManager.setEnvVariables(this.machine, this.environmentVariables);
+      this.onChange();
+    }
+
   }
 
   /**
@@ -120,6 +129,17 @@ export class WorkspaceToolsIdeController {
     this.packages.forEach((_package: IPackage) => {
       _package.isEnabled = this.isPackageEnabled(_package.name);
     });
+
+    this.plugins.forEach((plugin: string) => {
+      if (plugin.indexOf(':') > 0) {
+        let name = plugin.substring(0, plugin.indexOf(':'));
+        let url = plugin.substring(plugin.indexOf(':') - 1);
+        let p: IPackage = {name : name, isEnabled: true, description: url, version: '-', keywords: ['']};
+        this.packages.push(p);
+      }
+    });
+
+
     this.cheListHelper.setList(this.packages, 'name');
   }
 

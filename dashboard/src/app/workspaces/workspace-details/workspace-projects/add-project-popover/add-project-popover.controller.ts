@@ -52,5 +52,4 @@ export class AddProjectPopoverController {
     // close popover
     this.isOpen = false;
   }
-
 }
