@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.deploy;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class WsMasterServletModule extends ServletModule {
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
     filter("/*").through(RequestIdLoggerFilter.class);
+    filter("/user/create").through(RequestIdLoggerFilter.class);
 
     // Matching group SHOULD contain forward slash.
     serveRegex("^(?!/websocket.?)(.*)").with(GuiceEverrestServlet.class);
@@ -64,6 +66,14 @@ public class WsMasterServletModule extends ServletModule {
   private void configureMultiUserMode() {
     // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
     filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+
+    Map filterParams = ImmutableMap.of("excludedMethods", "GET");
+
+    filter("/user").through(UnavailableResourceInMultiUserFilter.class, filterParams);
+    filterRegex("/user/*").through(UnavailableResourceInMultiUserFilter.class, filterParams);
+
+    filter("/profile/attributes").through(UnavailableResourceInMultiUserFilter.class);
+    filter("/profile/*/attributes").through(UnavailableResourceInMultiUserFilter.class);
     install(new KeycloakServletModule());
   }
 }
