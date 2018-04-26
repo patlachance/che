@@ -25,6 +25,10 @@ echo "[CHE] Configuring Keycloak realm, client and user..."
 
 cat "${COMMAND_DIR}"/keycloak-config/keycloak-config-pod-deployment.yaml | sed "s/\${CHE_HOST}/${CHE_HOST}/" | \
                                                            sed "s/\${KC_HOST}/${KC_HOST}/" | \
+                                                           sed "s#\${KC_OPTS}#${KC_OPTS}#" | \
+                                                           sed "s#\${CHE_HTTP_PROXY}#${CHE_HTTP_PROXY}#" | \
+                                                           sed "s#\${CHE_HTTPS_PROXY}#${CHE_HTTPS_PROXY}#" | \
+                                                           sed "s#\${CHE_NO_PROXY}#${CHE_NO_PROXY}#" | \
                                                            sed "s/\${HTTP_PROTOCOL}/${HTTP_PROTOCOL}/" | \
                                                            sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | \
                                                            sed "s/\${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}/${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}/" | \

@@ -43,7 +43,11 @@ fi
 if [ -z "${IMAGE_KEYCLOAK+x}" ]; then echo "[CHE] **ERROR**Env var IMAGE_KEYCLOAK is unset. You need to set it to continue. Aborting"; exit 1; fi
 
 for i in $(ls "$COMMAND_DIR"/keycloak ); do
-    cat "${COMMAND_DIR}"/keycloak/"${i}" | sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | oc apply -f -
+    cat "${COMMAND_DIR}"/keycloak/"${i}" | sed -e "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" \
+                                               -e "s#\${CHE_HTTP_PROXY}#${CHE_HTTP_PROXY}#" \
+                                               -e "s#\${CHE_HTTPS_PROXY}#${CHE_HTTPS_PROXY}#" \
+                                               -e "s#\${CHE_NO_PROXY}#${CHE_NO_PROXY}#" \
+                                         | oc apply -f -
 done
 
 

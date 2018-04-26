@@ -10,4 +10,11 @@ class openshift {
    mode   => "755",
    recurse => true,
   }
+  # creating che.env
+  file { "/opt/che/config/openshift/scripts/che-config":
+    ensure  => "present",
+    content => template("openshift/che-config.erb"),
+    mode    => "644",
+  }
+
 }

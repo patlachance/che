@@ -40,6 +40,18 @@ spec:
           value: admin
         - name: KEYCLOAK_PASSWORD
           value: admin
+        - name: HTTP_PROXY
+          value: "${CHE_HTTP_PROXY}"
+        - name: HTTPS_PROXY
+          value: "${CHE_HTTPS_PROXY}"
+        - name: NO_PROXY
+          value: "${CHE_NO_PROXY}"
+        - name: http_proxy
+          value: "${CHE_HTTP_PROXY}"
+        - name: https_proxy
+          value: "${CHE_HTTPS_PROXY}"
+        - name: no_proxy
+          value: "${CHE_NO_PROXY}"
         image: '${IMAGE_KEYCLOAK}'
         imagePullPolicy: Always
         name: keycloak

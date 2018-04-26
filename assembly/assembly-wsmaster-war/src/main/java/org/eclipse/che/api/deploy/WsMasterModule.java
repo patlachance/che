@@ -50,6 +50,9 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnv
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.HttpNoProxyEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.HttpProxyEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.HttpsProxyEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
@@ -151,6 +154,9 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(MachineTokenEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
 
+    envVarProviders.addBinding().to(HttpNoProxyEnvVariableProvider.class);
+    envVarProviders.addBinding().to(HttpProxyEnvVariableProvider.class);
+    envVarProviders.addBinding().to(HttpsProxyEnvVariableProvider.class);
     envVarProviders.addBinding().to(JavaOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(MavenOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);

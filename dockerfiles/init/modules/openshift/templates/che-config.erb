@@ -1,0 +1,81 @@
+# To put some extra CHE server configurations just add here CHE ENV vars following format:
+# KEY: "value"
+CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}
+CHE_PORT: <%= scope.lookupvar('che::che_port') %>
+CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api
+CHE_WEBSOCKET_ENDPOINT:  ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api/websocket
+CHE_DEBUG_SERVER: ${CHE_DEBUG_SERVER}
+CHE_INFRASTRUCTURE_ACTIVE: openshift
+CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN: "5"
+CHE_INFRA_KUBERNETES_MASTER__URL: ${CHE_INFRA_KUBERNETES_MASTER__URL}
+CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ${CHE_INFRA_KUBERNETES_OAUTH__TOKEN}
+CHE_INFRA_KUBERNETES_PASSWORD: ${CHE_INFRA_KUBERNETES_PASSWORD}
+CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_INFRA_OPENSHIFT_PROJECT}
+CHE_INFRA_KUBERNETES_PVC_STRATEGY: ${CHE_INFRA_KUBERNETES_PVC_STRATEGY}
+CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: ${CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS}
+CHE_INFRA_OPENSHIFT_TLS__ENABLED: ${ENABLE_SSL}
+CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
+CHE_INFRA_KUBERNETES_USERNAME: ${CHE_INFRA_KUBERNETES_USERNAME}
+CHE_KEYCLOAK_AUTH__SERVER__URL: ${CHE_KEYCLOAK_AUTH__SERVER__URL}
+CHE_KEYCLOAK_CLIENT__ID: ${CHE_KEYCLOAK_CLIENT__ID}
+CHE_KEYCLOAK_GITHUB_ENDPOINT: ${KEYCLOAK_GITHUB_ENDPOINT}
+CHE_KEYCLOAK_OSO_ENDPOINT: ${CHE_KEYCLOAK_OSO_ENDPOINT}
+CHE_KEYCLOAK_REALM: ${CHE_KEYCLOAK_REALM}
+CHE_LOCAL_CONF_DIR: /etc/conf
+CHE_LOGS_DIR: /data/logs
+CHE_LOG_LEVEL: ${CHE_LOG_LEVEL}
+CHE_MULTIUSER: ${CHE_MULTIUSER}
+CHE_OAUTH_GITHUB_CLIENTID: ${CHE_OAUTH_GITHUB_CLIENTID}
+CHE_OAUTH_GITHUB_CLIENTSECRET: ${CHE_OAUTH_GITHUB_CLIENTSECRET}
+CHE_PREDEFINED_STACKS_RELOAD__ON__START: ${CHE_PREDEFINED_STACKS_RELOAD}
+CHE_WORKSPACE_AUTO_START: "false"
+
+<% if ! @che_http_proxy.empty? or ! @che_https_proxy.empty? -%>
+# Setting http proxy environment variables
+JAVA_HTTP_PROXY_SET: -Dhttp.proxySet=true
+<% end -%>
+<% if ! @che_http_proxy.empty? -%>
+<% if ! @che_http_proxy.empty? and @che_http_proxy.include? '@' -%>
+JAVA_HTTP_USER_NAME: -Dhttp.proxyUser=<%= @che_http_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %>
+JAVA_HTTP_USER_PASSWORD: -Dhttp.proxyPassword=<%= @che_http_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %>
+JAVA_HTTP_PROXY_HOST: -Dhttp.proxyHost=<%= @che_http_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %>
+JAVA_HTTP_PROXY_PORT: -Dhttp.proxyPort=<%= @che_http_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1].gsub(/\/.*/,'') %>
+<% else -%>
+JAVA_HTTP_PROXY_HOST: -Dhttp.proxyHost=<%= @che_http_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %>
+JAVA_HTTP_PROXY_PORT: -Dhttp.proxyPort=<%= @che_http_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1].gsub(/\/.*/,'') %>
+CHE_WORKSPACE_HTTP__PROXY: <%= @che_http_proxy %>
+CHE_HTTP_PROXY: <%= @che_http_proxy %>
+HTTP_PROXY: <%= @che_http_proxy %>
+http_proxy: <%= @che_http_proxy %>
+<% end -%>
+<% end -%>
+<% if ! @che_https_proxy.empty? -%>
+<% if @che_https_proxy.include? '@' -%>
+JAVA_HTTPS_USER_NAME: -Dhttps.proxyUser=<%= @che_https_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %>
+JAVA_HTTPS_USER_PASSWORD: -Dhttps.proxyPassword=<%= @che_https_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %>
+JAVA_HTTPS_PROXY_HOST: -Dhttps.proxyHost=<%= @che_https_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %>
+JAVA_HTTPS_PROXY_PORT: -Dhttps.proxyPort=<%= @che_https_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1].gsub(/\/.*/,'') %>
+<% else -%>
+JAVA_HTTPS_PROXY_HOST: -Dhttps.proxyHost=<%= @che_https_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %>
+JAVA_HTTPS_PROXY_PORT: -Dhttps.proxyPort=<%= @che_https_proxy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1].gsub(/\/.*/,'') %>
+CHE_WORKSPACE_HTTPS__PROXY: <%= @che_https_proxy %>
+CHE_HTTPS_PROXY: <%= @che_https_proxy %>
+HTTPS_PROXY: <%= @che_https_proxy %>
+https_proxy: <%= @che_https_proxy %>
+<% end -%>
+<% end -%>
+<% if ! @che_no_proxy.empty? -%>
+JAVA_NO_PROXY: -Dhttp.nonProxyHosts='<%= @no_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').gsub(/[[:space:]]/,'').split(",").uniq.join("|") %>'
+CHE_WORKSPACE_NO__PROXY: <%= @che_no_proxy %>
+CHE_NO_PROXY: <%= @che_no_proxy %>
+NO_PROXY: <%= @che_no_proxy %>
+no_proxy: <%= @che_no_proxy %>
+<% end -%>
+
+JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m <% if ! @che_http_proxy.empty? or ! @che_https_proxy.empty? -%>\\\$JAVA_HTTP_PROXY_SET<% end -%> <% if ! @che_http_proxy.empty? -%>\\\$JAVA_HTTP_PROXY_HOST \\\$JAVA_HTTP_PROXY_PORT<% end -%> <% if ! @che_https_proxy.empty? -%>\\\$JAVA_HTTPS_PROXY_HOST \\\$JAVA_HTTPS_PROXY_PORT<% end -%> <% if ! @che_no_proxy.empty? -%>\\\$JAVA_NO_PROXY<% end -%> <% if @che_http_proxy.include? '@' -%> \\\$JAVA_HTTP_USER_NAME \\\$JAVA_HTTP_USER_PASSWORD<% end -%> <% if @che_https_proxy.include? '@' -%> \\\$JAVA_HTTPS_USER_NAME \\\$JAVA_HTTPS_USER_PASSWORD<% end %>"
+
+# http proxy options for jvm
+CHE_WORKSPACE_HTTP__PROXY__JAVA__OPTIONS: <% if ! @http_proxy_for_che_workspaces.empty? or ! @https_proxy_for_che_workspaces.empty? -%>-Dhttp.proxySet=true<% end -%> <% if ! @http_proxy_for_che_workspaces.empty? -%> <% if ! @http_proxy_for_che_workspaces.empty? and @http_proxy_for_che_workspaces.include? '@' -%> -Dhttp.proxyUser=<%= @http_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %> -Dhttp.proxyPassword=<%= @http_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %> -Dhttp.proxyHost=<%= @http_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %> -Dhttp.proxyPort=<%= @http_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1].gsub(/\/.*/,'') %> <% else -%> -Dhttp.proxyHost=<%= @http_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %> -Dhttp.proxyPort=<%= @http_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1].gsub(/\/.*/,'') %> <% end -%> <% end -%> <% if ! @https_proxy_for_che_workspaces.empty? -%> <% if @https_proxy_for_che_workspaces.include? '@' -%> -Dhttps.proxyUser=<%= @https_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %> -Dhttps.proxyPassword=<%= @https_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %> -Dhttps.proxyHost=<%= @https_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %> -Dhttps.proxyPort=<%= @https_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1].gsub(/\/.*/,'') %> <% else -%> -Dhttps.proxyHost=<%= @https_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %> -Dhttps.proxyPort=<%= @https_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1].gsub(/\/.*/,'') %> <% end -%> <% end -%> <% if ! @che_no_proxy.empty? -%> -Dhttp.nonProxyHosts='<%= @no_proxy_for_che_workspaces.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(",").uniq.join("|") %>|'<% end -%>
+
+

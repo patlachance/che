@@ -14,6 +14,20 @@ metadata:
 spec:
     containers:
     - env:
+      - name: HTTP_PROXY
+        value: "${CHE_HTTP_PROXY}"
+      - name: HTTPS_PROXY
+        value: "${CHE_HTTPS_PROXY}"
+      - name: NO_PROXY
+        value: "${CHE_NO_PROXY}"
+      - name: http_proxy
+        value: "${CHE_HTTP_PROXY}"
+      - name: https_proxy
+        value: "${CHE_HTTPS_PROXY}"
+      - name: no_proxy
+        value: "${CHE_NO_PROXY}"
+      - name: KC_OPTS
+        value: "${KC_OPTS}"
       - name: CHE_HOST
         value: "${CHE_HOST}"
       - name: HTTP_PROTOCOL
